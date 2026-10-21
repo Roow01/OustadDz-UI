@@ -1,0 +1,20 @@
+{
+  "name": "OustadDz - مساعدك الشخصي",
+  "short_name": "OustadDz",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#0f766e",
+  "icons": [
+    {
+      "src": "Gemini_Generated_Image_9ccjp9ccjp9ccjp9.jpeg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "Gemini_Generated_Image_9ccjp9ccjp9ccjp9.jpeg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}
