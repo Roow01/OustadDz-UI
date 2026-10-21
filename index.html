@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OustadDz | مساعدك الشخصي</title>
     
-    <!-- الشعار كأيقونة للتطبيق (Favicon) -->
+    <!-- ربط ملف التطبيق (PWA) -->
+    <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/jpeg" href="Gemini_Generated_Image_9ccjp9ccjp9ccjp9.jpeg">
     <link rel="apple-touch-icon" href="Gemini_Generated_Image_9ccjp9ccjp9ccjp9.jpeg">
     
@@ -26,48 +27,39 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
         body { background-color: var(--bg); color: var(--text); display: flex; flex-direction: column; height: 100vh; }
         
-        /* الترويسة العلوية */
         header {
             background: var(--card);
             padding: 10px 15px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: space-between; /* لترتيب العناصر: الشعار - زر المسح */
         }
         .header-info { display: flex; align-items: center; gap: 10px; }
         .header-info img { width: 45px; height: 45px; object-fit: cover; border-radius: 8px; }
         .header-text h1 { font-size: 1.2rem; color: var(--primary); font-weight: 700; }
         .header-text span { font-size: 0.75rem; color: #64748b; display: block; margin-top: 2px;}
         .header-text small { font-size: 0.6rem; color: #94a3b8; display: block; margin-top: 2px; }
-        
-        .qimah-brand { font-size: 0.7rem; color: var(--primary); font-weight: bold; text-align: left; line-height: 1.3; }
+
+        .clear-btn {
+            background: #f1f5f9; border: 1px solid var(--border); color: #ef4444; cursor: pointer;
+            padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; font-weight: bold;
+            display: flex; align-items: center; gap: 5px;
+        }
 
         #chat-container { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 15px; }
 
-        /* فقاعات المحادثة */
         .message-wrapper { display: flex; align-items: flex-end; gap: 8px; max-width: 90%; }
         .message-wrapper.bot { align-self: flex-end; flex-direction: row-reverse; }
         .message-wrapper.user { align-self: flex-start; }
         
-        /* صورة الوكيل */
         .avatar { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border); }
         .user-avatar { width: 35px; height: 35px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; }
 
-        .message { padding: 10px 14px; border-radius: 12px; line-height: 1.6; font-size: 0.95rem; position: relative; padding-bottom: 25px; }
+        .message { padding: 10px 14px; border-radius: 12px; line-height: 1.6; font-size: 0.95rem; position: relative; }
         .user-message { background: var(--primary); color: white; border-bottom-right-radius: 2px; }
         .bot-message { background: var(--card); color: var(--text); border-bottom-left-radius: 2px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); border: 1px solid var(--border); }
 
-        /* زر الصوت للمكفوفين */
-        .speak-btn {
-            background: #f1f5f9; border: none; border-radius: 50%; width: 30px; height: 30px;
-            cursor: pointer; font-size: 1rem; position: absolute; bottom: 5px; left: 5px; 
-            color: var(--primary); display: flex; align-items: center; justify-content: center;
-            transition: background 0.2s;
-        }
-        .speak-btn:hover { background: #e2e8f0; }
-        
-        /* تنسيق الردود */
         .bot-message h1, .bot-message h2, .bot-message h3 { margin-bottom: 8px; color: var(--primary); font-size: 1.1rem;}
         .bot-message ul, .bot-message ol { padding-right: 20px; margin-bottom: 8px; }
         .bot-message table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.85rem; }
@@ -75,7 +67,7 @@
         .bot-message blockquote { border-right: 4px solid var(--primary-light); padding-right: 10px; color: #475569; margin: 10px 0; font-style: italic; }
 
         #input-area { background: var(--card); padding: 15px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
-        .input-row { display: flex; gap: 10px; align-items: center; }
+        .input-row { display: flex; gap: 8px; align-items: center; }
 
         #message-input { flex: 1; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 25px; font-size: 0.95rem; outline: none; transition: border 0.2s; }
         #message-input:focus { border-color: var(--primary); }
@@ -83,6 +75,8 @@
         .btn { background: var(--primary); color: white; border: none; border-radius: 50%; width: 45px; height: 45px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; transition: background 0.2s; }
         .btn:disabled { background: #94a3b8; cursor: not-allowed; }
         .btn-file { background: transparent; color: var(--primary); border: 1px solid #cbd5e1; border-radius: 50%; width: 45px; height: 45px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+        
+        .mic-active { color: red !important; border-color: red !important; }
 
         .typing-indicator { display: none; align-self: flex-end; background: var(--card); padding: 10px 15px; border-radius: 12px; border: 1px solid var(--border); color: #64748b; font-size: 0.9rem; margin-right: 45px;}
         .typing-indicator.active { display: block; }
@@ -98,21 +92,18 @@
 
     <header>
         <div class="header-info">
-            <!-- شعار Qimah -->
             <img src="Gemini_Generated_Image_9ccjp9ccjp9ccjp9.jpeg" alt="Qimah Logo">
             <div class="header-text">
                 <h1>OustadDz</h1>
                 <span>مساعدك الشخصي في الرياضيات</span>
-                <small>This AI assistant will help you learn and solve problems.</small>
+                <small>AI can make mistakes. Check important info.</small>
             </div>
         </div>
-        <div class="qimah-brand">
-            Powered by<br>Qimah Production
-        </div>
+        <!-- زر مسح المحادثة (Historique) -->
+        <button class="clear-btn" onclick="clearHistory()" title="مسح المحادثة">🗑️ مسح</button>
     </header>
 
     <div id="chat-container">
-        <!-- سيتم تحميل Historique هنا تلقائياً -->
         <div id="typing" class="typing-indicator">OustadDz يكتب الآن...</div>
     </div>
 
@@ -125,18 +116,26 @@
         <div class="input-row">
             <button class="btn-file" onclick="document.getElementById('file-input').click()" title="رفع صورة">📎</button>
             <input type="file" id="file-input" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+            
             <input type="text" id="message-input" placeholder="اكتب سؤالك هنا..." onkeypress="handleKeyPress(event)">
+            
+            <button class="btn-file" id="mic-btn" onclick="toggleSpeechRecognition()" title="تحدث">🎙️</button>
+            
             <button class="btn" id="send-btn" onclick="sendMessage()" title="إرسال">➤</button>
         </div>
     </div>
 
-    <footer>Powered by Qimah Production 🇩🇿</footer>
+    <footer>Powered by Qimah Production | V 1.0</footer>
 
     <script>
+        // تسجيل Service Worker لتفعيل التثبيت على الهاتف
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed', err));
+        }
+
         const API_URL = "https://oustaddz.onrender.com/chat";
         let currentImageBase64 = null;
         
-        // تحميل السجل (Historique) عند فتح الصفحة
         window.onload = function() {
             const history = JSON.parse(localStorage.getItem('oustdz_chat_history')) || [];
             if (history.length === 0) {
@@ -147,12 +146,18 @@
             }
         };
 
+        function clearHistory() {
+            if(confirm("هل أنت متأكد من مسح المحادثة بالكامل؟")) {
+                localStorage.removeItem('oustdz_chat_history');
+                location.reload();
+            }
+        }
+
         function handleKeyPress(e) { if (e.key === 'Enter') sendMessage(); }
 
         function handleImageUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
             reader.onload = function(e) {
                 const img = new Image();
@@ -197,7 +202,6 @@
             typing.innerText = "OustadDz يكتب الآن...";
             document.getElementById('send-btn').disabled = true;
 
-            // تنبيه في حال كان الخادم نائماً (Render Free)
             const sleepTimer = setTimeout(() => {
                 typing.innerText = "جاري استيقاظ الخادم (قد يستغرق 30 ثانية)... ⏳";
             }, 4000);
@@ -224,7 +228,7 @@
             } catch (error) {
                 clearTimeout(sleepTimer);
                 typing.classList.remove('active');
-                addMessageToDOM("عذراً، حدث خطأ. يرجى المحاولة مرة أخرى.", 'bot');
+                addMessageToDOM("عذراً، حدث خطأ في الاتصال بالخادم. يرجى المحاولة مرة أخرى.", 'bot');
             } finally {
                 document.getElementById('send-btn').disabled = false;
             }
@@ -235,11 +239,10 @@
             const wrapper = document.createElement('div');
             wrapper.className = `message-wrapper ${sender}`;
             
-            // الصورة الرمزية (Avatar)
             if (sender === 'bot') {
                 const avatarImg = document.createElement('img');
-                // هنا استخدمنا اسم صورة الأستاذ كما هو موجود في مستودعك
-                avatarImg.src = 'Capture d\'écran_20261016_221014.jpg'; 
+                // ترميز مسافات ورموز اسم الصورة ليعمل بشكل صحيح
+                avatarImg.src = "Capture%20d'%C3%A9cran_20261016_221014.jpg"; 
                 avatarImg.className = 'avatar';
                 wrapper.appendChild(avatarImg);
             } else {
@@ -251,21 +254,9 @@
 
             const msgDiv = document.createElement('div');
             msgDiv.className = `message ${sender}-message`;
-            
-            // تحويل Markdown
             let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\*(.*?)\*/g, '<i>$1</i>').replace(/\n/g, '<br>');
             msgDiv.innerHTML = formattedText;
             
-            // إضافة زر الصوت (للمكفوفين) في رسائل البوت
-            if (sender === 'bot') {
-                const speakBtn = document.createElement('button');
-                speakBtn.className = 'speak-btn';
-                speakBtn.innerHTML = '🔊';
-                speakBtn.title = 'استمع للرد';
-                speakBtn.onclick = () => speakText(msgDiv.innerText);
-                msgDiv.appendChild(speakBtn);
-            }
-
             wrapper.appendChild(msgDiv);
             
             const typing = document.getElementById('typing');
@@ -277,24 +268,60 @@
             }
         }
 
-        // دالة حفظ السجل (Historique)
         function saveMessage(text, sender) {
             const history = JSON.parse(localStorage.getItem('oustdz_chat_history')) || [];
             history.push({ text, sender });
             localStorage.setItem('oustdz_chat_history', JSON.stringify(history));
         }
 
-        // دالة قراءة النص للمكفوفين (Text-to-Speech)
-        function speakText(text) {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel(); // إيقاف أي صوت حالي
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'ar-SA'; // اللغة العربية
-                utterance.rate = 0.95; // سرعة القراءة
-                window.speechSynthesis.speak(utterance);
-            } else {
-                alert("متصفحك لا يدعم خاصية القراءة الصوتية.");
+        let isRecording = false;
+        let recognition = null;
+
+        function toggleSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert("متصفحك لا يدعم خاصية إدخال الصوت. يرجى استخدام متصفح Chrome.");
+                return;
             }
+            const micBtn = document.getElementById('mic-btn');
+            const inputField = document.getElementById('message-input');
+
+            if (isRecording) {
+                if (recognition) recognition.stop();
+                micBtn.classList.remove('mic-active');
+                isRecording = false;
+                return;
+            }
+
+            recognition = new SpeechRecognition();
+            recognition.lang = 'ar-DZ'; 
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            recognition.onstart = function() {
+                isRecording = true;
+                micBtn.classList.add('mic-active');
+                inputField.placeholder = "جاري الاستماع...";
+            };
+
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript;
+                inputField.value += " " + transcript;
+            };
+
+            recognition.onerror = function(event) {
+                micBtn.classList.remove('mic-active');
+                isRecording = false;
+                inputField.placeholder = "اكتب سؤالك هنا...";
+            };
+
+            recognition.onend = function() {
+                micBtn.classList.remove('mic-active');
+                isRecording = false;
+                inputField.placeholder = "اكتب سؤالك هنا...";
+            };
+
+            recognition.start();
         }
     </script>
 </body>
