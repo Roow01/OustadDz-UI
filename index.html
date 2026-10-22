@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OustadDz | مساعدك الشخصي</title>
+    <title>OustadDz</title>
     
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/jpeg" href="Gemini_Generated_Image_9ccjp9ccjp9ccjp9.jpeg">
@@ -19,7 +19,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
         body { background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
         
-        /* الشريط الجانبي (السجل) */
+        /* الشريط الجانبي */
         #sidebar {
             width: 260px; background: var(--sidebar); border-left: 1px solid var(--border);
             display: flex; flex-direction: column; transition: transform 0.3s ease;
@@ -44,17 +44,19 @@
         .history-item:hover .delete-chat-btn { display: block; }
 
         /* المنطقة الرئيسية */
-        #main-content { flex: 1; display: flex; flex-direction: column; width: 100%; height: 100%; transition: margin-right 0.3s ease; margin-right: 260px; }
-        #main-content.full-width { margin-right: 0; }
+        #main-content { flex: 1; display: flex; flex-direction: column; height: 100%; transition: margin-right 0.3s ease; margin-right: 260px; }
         
-        header { padding: 10px 15px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.95); }
+        /* الترويسة العلوية */
+        header { padding: 10px 15px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.95); z-index: 10; }
         .menu-btn { background: transparent; border: none; cursor: pointer; color: var(--text); display: flex; align-items: center; }
         .menu-btn svg { width: 24px; height: 24px; }
-        .header-title { font-size: 1rem; font-weight: 700; flex: 1; text-align: center; }
+        .header-titles { flex: 1; text-align: center; display: flex; flex-direction: column; align-items: center; }
+        .header-title { font-size: 1.1rem; font-weight: 700; color: var(--text); line-height: 1.2; }
+        .header-subtitle { font-size: 0.7rem; color: #64748b; }
+        .header-warning { font-size: 0.6rem; color: #94a3b8; }
 
         #chat-container { flex: 1; overflow-y: auto; padding: 20px 15px; display: flex; flex-direction: column; gap: 20px; }
         
-        /* الرسائل والصور الرمزية */
         .message-wrapper { display: flex; align-items: flex-end; gap: 8px; width: 100%; max-width: 800px; margin: 0 auto; }
         .message-wrapper.user { justify-content: flex-start; flex-direction: row-reverse; }
         .message-wrapper.bot { justify-content: flex-end; }
@@ -84,10 +86,9 @@
         #image-preview img { width: 40px; height: 40px; object-fit: cover; border-radius: 8px; }
         #remove-image { cursor: pointer; color: #ef4444; background: none; border: none; display: flex; }
 
-        /* الشعار السفلي والعبارة التحذيرية */
-        footer { text-align: center; padding: 10px; font-size: 0.75rem; color: #94a3b8; background: var(--bg); }
-        .disclaimer { font-size: 0.65rem; color: #cbd5e1; margin-bottom: 5px; display: block; }
-
+        /* التذييل الثابت في الأسفل */
+        footer { text-align: center; padding: 8px; font-size: 0.7rem; color: #94a3b8; background: var(--bg); border-top: 1px solid var(--border); }
+        
         @media (max-width: 768px) {
             #sidebar { transform: translateX(100%); }
             #sidebar.open { transform: translateX(0); }
@@ -97,7 +98,6 @@
 </head>
 <body>
 
-    <!-- الشريط الجانبي للسجل -->
     <div id="sidebar">
         <div class="sidebar-header">
             <button class="new-chat-btn" onclick="startNewChat()">
@@ -108,13 +108,16 @@
         <div id="history-list"></div>
     </div>
 
-    <!-- المنطقة الرئيسية -->
     <div id="main-content">
         <header>
             <button class="menu-btn" onclick="toggleSidebar()">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
             </button>
-            <div class="header-title">OustadDz</div>
+            <div class="header-titles">
+                <div class="header-title">OustadDz</div>
+                <div class="header-subtitle">Powered by M.R.</div>
+                <div class="header-warning">AI can make mistakes. Check important info.</div>
+            </div>
         </header>
 
         <div id="chat-container">
@@ -142,11 +145,9 @@
                 </button>
             </div>
         </div>
-        
-        <footer>
-            <span class="disclaimer">AI can make mistakes. Check important info.</span>
-            Powered by Qimah Production | V 1.0
-        </footer>
+
+        <!-- التذييل الثابت -->
+        <footer>Powered by Qimah Production | V 1.0</footer>
     </div>
 
     <script>
@@ -209,11 +210,15 @@
             const container = document.getElementById('chat-container');
             container.innerHTML = '<div id="typing">جاري الكتابة...</div>';
             const chat = allChats.find(c => c.id === currentChatId);
-            if (!chat) return;
             
-            chat.messages.forEach(msg => {
-                addMessageToDOM(msg.content, msg.role === 'user' ? 'user' : 'bot');
-            });
+            // إذا كانت المحادثة جديدة وفارغة، نضع رسالة ترحيبية
+            if (chat && chat.messages.length === 0) {
+                addMessageToDOM("مرحباً بك! أنا <b>OustadDz</b>، مساعدك الشخصي للتعليم الثانوي الجزائري. كيف يمكنني مساعدتك اليوم؟", 'bot');
+            } else if (chat) {
+                chat.messages.forEach(msg => {
+                    addMessageToDOM(msg.content, msg.role === 'user' ? 'user' : 'bot');
+                });
+            }
             container.scrollTop = container.scrollHeight;
         }
 
@@ -222,26 +227,28 @@
             else { currentChatId = allChats[0].id; renderHistory(); renderChatMessages(); }
         };
 
+        // إصلاح عرض الصور وتوافقها مع الهاتف
         function handleImageUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
-            if (file.type !== 'image/jpeg' && file.type !== 'image/png') {
-                alert("يرجى اختيار صورة بصيغة JPG أو PNG فقط.");
-                return;
-            }
+            
+            // عرض الصورة في المعاينة فوراً باستخدام ObjectURL (أسرع وأكثر توافقاً من Base64)
+            const objectUrl = URL.createObjectURL(file);
+            document.getElementById('preview-img').src = objectUrl;
+            document.getElementById('image-preview').style.display = 'flex';
+
+            // تحويل إلى Base64 للإرسال
             const reader = new FileReader();
             reader.onload = function(e) {
                 const img = new Image();
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 800;
+                    const MAX_WIDTH = 1000;
                     let scale = img.width > MAX_WIDTH ? MAX_WIDTH / img.width : 1;
                     canvas.width = img.width * scale;
                     canvas.height = img.height * scale;
                     canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-                    currentImageBase64 = canvas.toDataURL('image/jpeg', 0.7);
-                    document.getElementById('preview-img').src = currentImageBase64;
-                    document.getElementById('image-preview').style.display = 'flex';
+                    currentImageBase64 = canvas.toDataURL('image/jpeg', 0.8);
                 };
                 img.src = e.target.result;
             };
@@ -313,13 +320,11 @@
             const wrapper = document.createElement('div');
             wrapper.className = `message-wrapper ${sender}`;
             
-            // إضافة صورة الأستاذ
             if (sender === 'bot') {
                 const avatarImg = document.createElement('img');
-                // استخدام الرابط المشفر لاسم الصورة الخاصة بك لضمان ظهورها
                 avatarImg.src = "Capture%20d'%C3%A9cran_20261016_221014.jpg"; 
                 avatarImg.className = 'avatar';
-                avatarImg.onerror = function() { this.style.display = 'none'; }; // إخفاء إذا لم توجد
+                avatarImg.onerror = function() { this.style.display = 'none'; }; 
                 wrapper.appendChild(avatarImg);
             } else {
                 const userAvatar = document.createElement('div');
