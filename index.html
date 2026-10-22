@@ -12,188 +12,233 @@
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
-        
         :root {
-            --bg: #ffffff;
-            --text: #0f172a;
-            --user-msg: #f3f4f6;
-            --bot-msg: #ffffff;
-            --border: #e5e7eb;
-            --primary: #10a37f;
+            --bg: #ffffff; --sidebar: #f9f9f9; --text: #0f172a;
+            --user-msg: #f3f4f6; --bot-msg: #ffffff; --border: #e5e7eb; --primary: #10a37f;
         }
-
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
-        body { background-color: var(--bg); color: var(--text); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        body { background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
         
-        header {
-            padding: 10px 15px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: rgba(255, 255, 255, 0.95);
-            z-index: 10;
+        /* الشريط الجانبي (السجل) */
+        #sidebar {
+            width: 260px; background: var(--sidebar); border-left: 1px solid var(--border);
+            display: flex; flex-direction: column; transition: transform 0.3s ease;
+            position: fixed; top: 0; bottom: 0; right: 0; z-index: 100;
         }
-        .header-info { display: flex; align-items: center; gap: 10px; }
-        .header-info img { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
-        .header-text h1 { font-size: 1rem; font-weight: 700; }
-        .header-text span { font-size: 0.7rem; color: #64748b; }
+        #sidebar.hidden { transform: translateX(100%); }
+        .sidebar-header { padding: 15px; border-bottom: 1px solid var(--border); }
+        .new-chat-btn {
+            width: 100%; padding: 10px; background: var(--primary); color: white;
+            border: none; border-radius: 8px; cursor: pointer; font-weight: bold;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        #history-list { flex: 1; overflow-y: auto; padding: 10px; }
+        .history-item {
+            padding: 10px; border-radius: 8px; cursor: pointer; font-size: 0.85rem;
+            margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .history-item:hover { background: #e5e7eb; }
+        .history-item.active { background: #e5e7eb; font-weight: bold; }
+        .delete-chat-btn { background: transparent; border: none; cursor: pointer; color: #ef4444; display: none; }
+        .history-item:hover .delete-chat-btn { display: block; }
+
+        /* المنطقة الرئيسية */
+        #main-content { flex: 1; display: flex; flex-direction: column; width: 100%; height: 100%; transition: margin-right 0.3s ease; margin-right: 260px; }
+        #main-content.full-width { margin-right: 0; }
         
-        .icon-btn {
-            background: transparent; border: none; cursor: pointer; 
-            display: flex; align-items: center; justify-content: center;
-            width: 40px; height: 40px; border-radius: 8px; color: var(--text);
-            transition: background 0.2s;
-        }
-        .icon-btn:hover { background: var(--user-msg); }
-        .icon-btn svg { width: 20px; height: 20px; }
+        header { padding: 10px 15px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.95); }
+        .menu-btn { background: transparent; border: none; cursor: pointer; color: var(--text); display: flex; align-items: center; }
+        .menu-btn svg { width: 24px; height: 24px; }
+        .header-title { font-size: 1rem; font-weight: 700; flex: 1; text-align: center; }
 
         #chat-container { flex: 1; overflow-y: auto; padding: 20px 15px; display: flex; flex-direction: column; gap: 20px; }
+        
+        /* الرسائل والصور الرمزية */
+        .message-wrapper { display: flex; align-items: flex-end; gap: 8px; width: 100%; max-width: 800px; margin: 0 auto; }
+        .message-wrapper.user { justify-content: flex-start; flex-direction: row-reverse; }
+        .message-wrapper.bot { justify-content: flex-end; }
+        
+        .avatar { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border); }
+        .user-avatar { width: 35px; height: 35px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; }
 
-        .message-wrapper { display: flex; flex-direction: column; width: 100%; max-width: 800px; margin: 0 auto; }
-        .message-wrapper.user { align-items: flex-end; }
-        .message-wrapper.bot { align-items: flex-start; }
-
-        .message { 
-            padding: 12px 18px; border-radius: 16px; line-height: 1.7; font-size: 0.95rem; 
-            max-width: 85%; word-wrap: break-word;
-        }
+        .message { padding: 12px 18px; border-radius: 16px; line-height: 1.7; font-size: 0.95rem; max-width: 85%; word-wrap: break-word; }
         .user-message { background: var(--user-msg); color: var(--text); border-bottom-right-radius: 4px; }
         .bot-message { background: var(--bot-msg); color: var(--text); border-bottom-left-radius: 4px; border: 1px solid var(--border); }
 
-        .bot-message h1, .bot-message h2, .bot-message h3 { margin-bottom: 10px; font-size: 1.1rem; font-weight: 700;}
-        .bot-message ul, .bot-message ol { padding-right: 20px; margin-bottom: 10px; }
-        .bot-message table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.85rem; }
-        .bot-message th, .bot-message td { border: 1px solid var(--border); padding: 8px; text-align: center; }
-        .bot-message blockquote { border-right: 4px solid #cbd5e1; padding-right: 10px; color: #64748b; margin: 10px 0; font-style: italic; }
-
-        #input-area {
-            padding: 15px; background: var(--bg); border-top: 1px solid var(--border);
-            display: flex; justify-content: center; flex-direction: column; align-items: center;
-        }
-        .input-container {
-            display: flex; align-items: center; gap: 8px; width: 100%; max-width: 800px;
-            background: var(--user-msg); border-radius: 24px; padding: 8px 12px;
-        }
-        #message-input {
-            flex: 1; background: transparent; border: none; color: var(--text);
-            padding: 10px 5px; font-size: 0.95rem; outline: none; resize: none;
-        }
-        .input-icon-btn {
-            background: transparent; border: none; cursor: pointer; color: #64748b;
-            display: flex; align-items: center; justify-content: center;
-            width: 35px; height: 35px; border-radius: 50%; transition: background 0.2s;
-        }
-        .input-icon-btn:hover { background: #e2e8f0; }
-        .input-icon-btn svg { width: 20px; height: 20px; }
+        #input-area { padding: 15px; background: var(--bg); border-top: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; }
+        .input-container { display: flex; align-items: center; gap: 8px; width: 100%; max-width: 800px; background: var(--user-msg); border-radius: 24px; padding: 8px 12px; }
+        #message-input { flex: 1; background: transparent; border: none; color: var(--text); padding: 10px 5px; font-size: 0.95rem; outline: none; }
+        .icon-btn { background: transparent; border: none; cursor: pointer; color: #64748b; display: flex; align-items: center; justify-content: center; width: 35px; height: 35px; border-radius: 50%; }
+        .icon-btn:hover { background: #e2e8f0; }
+        .icon-btn svg { width: 20px; height: 20px; }
         .send-btn { background: var(--primary); color: white; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; }
         .send-btn:disabled { background: #a1a1aa; cursor: not-allowed; }
         .send-btn svg { width: 18px; height: 18px; transform: rotate(180deg); }
 
-        .mic-active { color: #ef4444 !important; background: #fee2e2 !important; }
-
-        .typing-indicator { display: none; align-self: flex-start; background: var(--bot-msg); padding: 10px 18px; border-radius: 16px; border: 1px solid var(--border); color: #64748b; font-size: 0.9rem; margin: 0 auto 0 0; width: fit-content; }
-        .typing-indicator.active { display: block; animation: pulse 1.5s infinite; }
+        #typing { display: none; align-self: flex-start; color: #64748b; font-size: 0.9rem; margin: 0 auto 0 0; }
+        #typing.active { display: block; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
 
         #image-preview { display: none; align-items: center; gap: 10px; background: #f1f5f9; padding: 8px; border-radius: 12px; font-size: 0.85rem; margin: 0 auto 10px auto; max-width: 800px; width: 100%; }
         #image-preview img { width: 40px; height: 40px; object-fit: cover; border-radius: 8px; }
         #remove-image { cursor: pointer; color: #ef4444; background: none; border: none; display: flex; }
 
-        footer { text-align: center; padding: 10px; font-size: 0.7rem; color: #94a3b8; }
+        /* الشعار السفلي والعبارة التحذيرية */
+        footer { text-align: center; padding: 10px; font-size: 0.75rem; color: #94a3b8; background: var(--bg); }
+        .disclaimer { font-size: 0.65rem; color: #cbd5e1; margin-bottom: 5px; display: block; }
+
+        @media (max-width: 768px) {
+            #sidebar { transform: translateX(100%); }
+            #sidebar.open { transform: translateX(0); }
+            #main-content { margin-right: 0 !important; }
+        }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="header-info">
-            <img src="Gemini_Generated_Image_9ccjp9ccjp9ccjp9.jpeg" alt="Qimah">
-            <div class="header-text">
-                <h1>OustadDz</h1>
-                <span>مساعدك الشخصي في الرياضيات</span>
+    <!-- الشريط الجانبي للسجل -->
+    <div id="sidebar">
+        <div class="sidebar-header">
+            <button class="new-chat-btn" onclick="startNewChat()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                محادثة جديدة
+            </button>
+        </div>
+        <div id="history-list"></div>
+    </div>
+
+    <!-- المنطقة الرئيسية -->
+    <div id="main-content">
+        <header>
+            <button class="menu-btn" onclick="toggleSidebar()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+            <div class="header-title">OustadDz</div>
+        </header>
+
+        <div id="chat-container">
+            <div id="typing">جاري الكتابة...</div>
+        </div>
+
+        <div id="input-area">
+            <div id="image-preview">
+                <img id="preview-img" src="" alt="Preview">
+                <span>صورة مرفقة</span>
+                <button id="remove-image" onclick="clearImage()">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="input-container">
+                <button class="icon-btn" onclick="document.getElementById('file-input').click()">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
+                </button>
+                <input type="file" id="file-input" accept="image/jpeg, image/png" style="display: none;" onchange="handleImageUpload(event)">
+                
+                <input type="text" id="message-input" placeholder="اكتب رسالتك هنا..." onkeypress="if(event.key === 'Enter') sendMessage()">
+                
+                <button class="send-btn" id="send-btn" onclick="sendMessage()">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                </button>
             </div>
         </div>
-        <div style="display: flex; gap: 5px;">
-            <button class="icon-btn" onclick="clearHistory()" title="محادثة جديدة">
-                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-            </button>
-        </div>
-    </header>
-
-    <div id="chat-container">
-        <div id="typing" class="typing-indicator">OustadDz يكتب الآن...</div>
+        
+        <footer>
+            <span class="disclaimer">AI can make mistakes. Check important info.</span>
+            Powered by Qimah Production | V 1.0
+        </footer>
     </div>
-
-    <div id="input-area">
-        <div id="image-preview">
-            <img id="preview-img" src="" alt="Preview">
-            <span>صورة مرفقة</span>
-            <button id="remove-image" onclick="clearImage()">
-                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-        </div>
-        <div class="input-container">
-            <button class="input-icon-btn" onclick="document.getElementById('file-input').click()" title="رفع صورة">
-                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
-            </button>
-            <input type="file" id="file-input" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
-            
-            <input type="text" id="message-input" placeholder="اكتب رسالتك هنا..." onkeypress="handleKeyPress(event)">
-            
-            <button class="input-icon-btn" id="mic-btn" onclick="toggleSpeechRecognition()" title="تحدث">
-                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
-            </button>
-
-            <button class="send-btn" id="send-btn" onclick="sendMessage()" title="إرسال">
-                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
-            </button>
-        </div>
-    </div>
-
-    <footer>Powered by Qimah Production | V 1.1</footer>
 
     <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').catch(err => console.log('SW failed', err));
-        }
-
         const API_URL = "https://oustaddz.onrender.com/chat";
         let currentImageBase64 = null;
         
-        window.onload = function() {
-            const history = JSON.parse(localStorage.getItem('oustdz_chat_history')) || [];
-            if (history.length === 0) {
-                addMessageToDOM("مرحباً بك! أنا <b>OustadDz</b>، مساعدك الشخصي. كيف يمكنني مساعدتك اليوم؟", 'bot');
-                saveMessage("مرحباً بك! أنا <b>OustadDz</b>، مساعدك الشخصي. كيف يمكنني مساعدتك اليوم؟", 'bot');
-            } else {
-                history.forEach(msg => addMessageToDOM(msg.text, msg.sender, false));
-            }
-        };
+        let allChats = JSON.parse(localStorage.getItem('oustdz_all_chats')) || [];
+        let currentChatId = null;
 
-        function clearHistory() {
-            if(confirm("هل أنت متأكد من بدء محادثة جديدة؟ سيتم مسح السجل الحالي.")) {
-                localStorage.removeItem('oustdz_chat_history');
-                location.reload();
-            }
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
         }
 
-        function handleKeyPress(e) { if (e.key === 'Enter') sendMessage(); }
+        function startNewChat() {
+            currentChatId = Date.now().toString();
+            allChats.unshift({ id: currentChatId, title: "محادثة جديدة", messages: [] });
+            saveAllChats();
+            renderHistory();
+            renderChatMessages();
+            document.getElementById('sidebar').classList.remove('open');
+        }
+
+        function loadChat(id) {
+            currentChatId = id;
+            renderHistory();
+            renderChatMessages();
+            document.getElementById('sidebar').classList.remove('open');
+        }
+
+        function deleteChat(id, event) {
+            event.stopPropagation();
+            allChats = allChats.filter(c => c.id !== id);
+            if (currentChatId === id) startNewChat();
+            saveAllChats();
+            renderHistory();
+        }
+
+        function saveAllChats() {
+            localStorage.setItem('oustdz_all_chats', JSON.stringify(allChats));
+        }
+
+        function renderHistory() {
+            const list = document.getElementById('history-list');
+            list.innerHTML = '';
+            allChats.forEach(chat => {
+                const div = document.createElement('div');
+                div.className = `history-item ${chat.id === currentChatId ? 'active' : ''}`;
+                div.innerHTML = `
+                    <span>${chat.title}</span>
+                    <button class="delete-chat-btn" onclick="deleteChat('${chat.id}', event)">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                `;
+                div.onclick = () => loadChat(chat.id);
+                list.appendChild(div);
+            });
+        }
+
+        function renderChatMessages() {
+            const container = document.getElementById('chat-container');
+            container.innerHTML = '<div id="typing">جاري الكتابة...</div>';
+            const chat = allChats.find(c => c.id === currentChatId);
+            if (!chat) return;
+            
+            chat.messages.forEach(msg => {
+                addMessageToDOM(msg.content, msg.role === 'user' ? 'user' : 'bot');
+            });
+            container.scrollTop = container.scrollHeight;
+        }
+
+        window.onload = function() {
+            if (allChats.length === 0) startNewChat();
+            else { currentChatId = allChats[0].id; renderHistory(); renderChatMessages(); }
+        };
 
         function handleImageUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
+            if (file.type !== 'image/jpeg' && file.type !== 'image/png') {
+                alert("يرجى اختيار صورة بصيغة JPG أو PNG فقط.");
+                return;
+            }
             const reader = new FileReader();
             reader.onload = function(e) {
                 const img = new Image();
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
                     const MAX_WIDTH = 800;
-                    let scale = 1;
-                    if (img.width > MAX_WIDTH) scale = MAX_WIDTH / img.width;
+                    let scale = img.width > MAX_WIDTH ? MAX_WIDTH / img.width : 1;
                     canvas.width = img.width * scale;
                     canvas.height = img.height * scale;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
                     currentImageBase64 = canvas.toDataURL('image/jpeg', 0.7);
                     document.getElementById('preview-img').src = currentImageBase64;
                     document.getElementById('image-preview').style.display = 'flex';
@@ -214,8 +259,16 @@
             const text = input.value.trim();
             if (!text && !currentImageBase64) return;
 
+            const chat = allChats.find(c => c.id === currentChatId);
+            
+            if (chat.messages.length === 0) {
+                chat.title = text.substring(0, 20) || "صورة";
+                renderHistory();
+            }
+
+            chat.messages.push({ role: 'user', content: text });
+            saveAllChats();
             addMessageToDOM(text, 'user');
-            saveMessage(text, 'user');
             
             input.value = '';
             const imgToSend = currentImageBase64;
@@ -223,12 +276,9 @@
 
             const typing = document.getElementById('typing');
             typing.classList.add('active');
-            typing.innerText = "OustadDz يكتب الآن...";
             document.getElementById('send-btn').disabled = true;
 
-            const sleepTimer = setTimeout(() => {
-                typing.innerText = "جاري استيقاظ الخادم (قد يستغرق 30 ثانية)... ⏳";
-            }, 4000);
+            const historyPayload = chat.messages.slice(0, -1).map(m => ({ role: m.role, content: m.content }));
 
             try {
                 const response = await fetch(API_URL, {
@@ -236,40 +286,54 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         message: text || "حلل هذه الصورة",
-                        image_base64: imgToSend
+                        image_base64: imgToSend,
+                        history: historyPayload
                     })
                 });
 
-                if (!response.ok) throw new Error("HTTP error " + response.status);
+                if (!response.ok) throw new Error("خطأ في الاتصال");
                 
                 const data = await response.json();
-                clearTimeout(sleepTimer);
                 typing.classList.remove('active');
                 
+                chat.messages.push({ role: 'assistant', content: data.reply });
+                saveAllChats();
                 addMessageToDOM(data.reply, 'bot');
-                saveMessage(data.reply, 'bot');
 
             } catch (error) {
-                clearTimeout(sleepTimer);
                 typing.classList.remove('active');
-                addMessageToDOM("عذراً، الخادم لا يستجيب حالياً. يرجى المحاولة بعد قليل.", 'bot');
+                addMessageToDOM("عذراً، حدث خطأ في الاتصال بالخادم.", 'bot');
             } finally {
                 document.getElementById('send-btn').disabled = false;
             }
         }
 
-        function addMessageToDOM(text, sender, animate = true) {
+        function addMessageToDOM(text, sender) {
             const container = document.getElementById('chat-container');
             const wrapper = document.createElement('div');
             wrapper.className = `message-wrapper ${sender}`;
             
+            // إضافة صورة الأستاذ
+            if (sender === 'bot') {
+                const avatarImg = document.createElement('img');
+                // استخدام الرابط المشفر لاسم الصورة الخاصة بك لضمان ظهورها
+                avatarImg.src = "Capture%20d'%C3%A9cran_20261016_221014.jpg"; 
+                avatarImg.className = 'avatar';
+                avatarImg.onerror = function() { this.style.display = 'none'; }; // إخفاء إذا لم توجد
+                wrapper.appendChild(avatarImg);
+            } else {
+                const userAvatar = document.createElement('div');
+                userAvatar.className = 'user-avatar';
+                userAvatar.innerText = 'أنا';
+                wrapper.appendChild(userAvatar);
+            }
+
             const msgDiv = document.createElement('div');
             msgDiv.className = `message ${sender}-message`;
-            let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\*(.*?)\*/g, '<i>$1</i>').replace(/\n/g, '<br>');
+            let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
             msgDiv.innerHTML = formattedText;
             
             wrapper.appendChild(msgDiv);
-            
             const typing = document.getElementById('typing');
             container.insertBefore(wrapper, typing);
             container.scrollTop = container.scrollHeight;
@@ -277,60 +341,6 @@
             if (sender === 'bot' && window.MathJax) {
                 MathJax.typesetPromise([msgDiv]);
             }
-        }
-
-        function saveMessage(text, sender) {
-            const history = JSON.parse(localStorage.getItem('oustdz_chat_history')) || [];
-            history.push({ text, sender });
-            localStorage.setItem('oustdz_chat_history', JSON.stringify(history));
-        }
-
-        let isRecording = false;
-        let recognition = null;
-
-        function toggleSpeechRecognition() {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) {
-                alert("متصفحك لا يدعم إدخال الصوت. استخدم Chrome.");
-                return;
-            }
-            const micBtn = document.getElementById('mic-btn');
-            const inputField = document.getElementById('message-input');
-
-            if (isRecording) {
-                if (recognition) recognition.stop();
-                micBtn.classList.remove('mic-active');
-                isRecording = false;
-                return;
-            }
-
-            recognition = new SpeechRecognition();
-            recognition.lang = 'ar-DZ'; 
-            recognition.interimResults = false;
-
-            recognition.onstart = function() {
-                isRecording = true;
-                micBtn.classList.add('mic-active');
-                inputField.placeholder = "جاري الاستماع... تحدث الآن";
-            };
-
-            recognition.onresult = function(event) {
-                inputField.value += " " + event.results[0][0].transcript;
-            };
-
-            recognition.onerror = function() {
-                micBtn.classList.remove('mic-active');
-                isRecording = false;
-                inputField.placeholder = "اكتب رسالتك هنا...";
-            };
-
-            recognition.onend = function() {
-                micBtn.classList.remove('mic-active');
-                isRecording = false;
-                inputField.placeholder = "اكتب رسالتك هنا...";
-            };
-
-            recognition.start();
         }
     </script>
 </body>
