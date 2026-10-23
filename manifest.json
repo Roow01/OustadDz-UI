@@ -1,20 +1,16 @@
 {
   "name": "OustadDz | مرافق التعليم الثانوي",
-  "short_name": "OustadDz",
+  "short_name": "أستاذ Dz",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#10a37f",
   "icons": [
     {
-      "src": "Gemini_Generated_Image_9ccjp9ccjp9ccjp9.jpeg",
+      "src": "Screenshot_20261023_191029.png",
       "sizes": "192x192",
-      "type": "image/jpeg"
-    },
-    {
-      "src": "Gemini_Generated_Image_9ccjp9ccjp9ccjp9.jpeg",
-      "sizes": "512x512",
-      "type": "image/jpeg"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
